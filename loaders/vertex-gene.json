@@ -1,0 +1,21 @@
+{
+  "source": {
+    "file": { "path": "/etl/data/processed/18.10_vertex-gene.csv.gz" }
+  },
+  "extractor": { "csv": {} },
+  "transformers": [{ "vertex": { "class": "Gene" } }],
+  "loader": {
+    "orientdb": {
+      "dbURL": "plocal:/orientdb/databases/opentargets",
+      "dbType": "graph",
+      "classes": [{ "name": "Gene", "extends": "V" }],
+      "indexes": [
+        {
+          "class": "Gene",
+          "fields": ["id:string"],
+          "type": "UNIQUE"
+        }
+      ]
+    }
+  }
+}

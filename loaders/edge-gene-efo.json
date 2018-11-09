@@ -1,0 +1,53 @@
+{
+  "source": {
+    "file": { "path": "/etl/data/processed/18.10_edge-gene-efo.csv.gz" }
+  },
+  "extractor": { "csv": {} },
+  "transformers": [
+    {
+      "field": {
+        "fieldName": "id",
+        "expression": "geneId"
+      }
+    },
+    { "merge": { "joinFieldName": "id", "lookup": "Gene.id" } },
+    { "vertex": { "class": "Gene", "skipDuplicates": true } },
+    {
+      "edge": {
+        "class": "IsAssociatedWith",
+        "joinFieldName": "efoId",
+        "lookup": "Disease.id",
+        "direction": "in",
+        "targetVertexFields": {},
+        "edgeFields": {
+          "score": "${input.score}",
+          "count": "${input.count}"
+        }
+      }
+    },
+    {
+      "field": {
+        "fieldNames": ["score", "count", "efoId"],
+        "operation": "remove"
+      }
+    }
+  ],
+  "loader": {
+    "orientdb": {
+      "dbURL": "plocal:/orientdb/databases/opentargets",
+      "dbType": "graph",
+      "classes": [
+        { "name": "Disease", "extends": "V" },
+        { "name": "Gene", "extends": "V" },
+        { "name": "IsAssociatedWith", "extends": "E" }
+      ],
+      "indexes": [
+        {
+          "class": "Gene",
+          "fields": ["id:string"],
+          "type": "UNIQUE"
+        }
+      ]
+    }
+  }
+}

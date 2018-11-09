@@ -1,0 +1,21 @@
+{
+  "source": {
+    "file": { "path": "/etl/data/processed/18.10_vertex-efo.csv.gz" }
+  },
+  "extractor": { "csv": {} },
+  "transformers": [{ "vertex": { "class": "Disease" } }],
+  "loader": {
+    "orientdb": {
+      "dbURL": "plocal:/orientdb/databases/opentargets",
+      "dbType": "graph",
+      "classes": [{ "name": "Disease", "extends": "V" }],
+      "indexes": [
+        {
+          "class": "Disease",
+          "fields": ["id:string"],
+          "type": "UNIQUE"
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "source": {
+    "file": { "path": "/etl/data/processed/18.10_vertex-tissue.csv.gz" }
+  },
+  "extractor": { "csv": {} },
+  "transformers": [{ "vertex": { "class": "Tissue", "skipDuplicates": true } }],
+  "loader": {
+    "orientdb": {
+      "dbURL": "plocal:/orientdb/databases/opentargets",
+      "dbType": "graph",
+      "classes": [{ "name": "Tissue", "extends": "V" }],
+      "indexes": [
+        {
+          "class": "Tissue",
+          "fields": ["id:string"],
+          "type": "UNIQUE"
+        }
+      ]
+    }
+  }
+}

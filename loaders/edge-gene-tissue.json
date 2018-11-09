@@ -1,0 +1,61 @@
+{
+  "source": {
+    "file": { "path": "/etl/data/processed/18.10_edge-gene-tissue.csv.gz" }
+  },
+  "extractor": { "csv": {} },
+  "transformers": [
+    {
+      "field": {
+        "fieldName": "id",
+        "expression": "geneId"
+      }
+    },
+    { "merge": { "joinFieldName": "id", "lookup": "Gene.id" } },
+    { "vertex": { "class": "Gene", "skipDuplicates": true } },
+    {
+      "edge": {
+        "class": "IsExpressedIn",
+        "joinFieldName": "tissueId",
+        "lookup": "Tissue.id",
+        "direction": "in",
+        "targetVertexFields": {},
+        "edgeFields": {
+          "rnaValue": "${input.rnaValue}",
+          "rnaLevel": "${input.rnaLevel}",
+          "rnaZLevel": "${input.rnaZLevel}",
+          "proteinLevel": "${input.proteinLevel}"
+        }
+      }
+    },
+    {
+      "field": {
+        "fieldNames": [
+          "tissueId",
+          "rnaValue",
+          "rnaLevel",
+          "rnaZLevel",
+          "proteinLevel"
+        ],
+        "operation": "remove"
+      }
+    }
+  ],
+  "loader": {
+    "orientdb": {
+      "dbURL": "plocal:/orientdb/databases/opentargets",
+      "dbType": "graph",
+      "classes": [
+        { "name": "Tissue", "extends": "V" },
+        { "name": "Gene", "extends": "V" },
+        { "name": "IsExpressedIn", "extends": "E" }
+      ],
+      "indexes": [
+        {
+          "class": "Gene",
+          "fields": ["id:string"],
+          "type": "UNIQUE"
+        }
+      ]
+    }
+  }
+}
