@@ -43,3 +43,32 @@ $ oetl.sh /etl/loaders/edge-gene-tissue.json
 ```
 
 You should now be able to browse the database `opentargets` in OrientDB Studio at http://localhost:2480. Username and password are both `root`.
+
+## Queries to try
+
+```
+MATCH {class:Gene, as: g, where: (symbol = "BRAF")}
+	.inE("IsExpressedIn") {as: e, where: (rnaLevel > 4)}
+    .outV()
+    {as: t}
+    RETURN g.symbol, t.name
+
+MATCH {class:Gene, as: g}
+	.inE("IsExpressedIn") {as: e, where: (rnaLevel > 7)}
+    .outV()
+    {as: t}
+    RETURN g.symbol, t.name
+
+MATCH {class:Disease, as: d, where: (id = "EFO_0003778")}
+	.outE("IsAssociatedWith") {as: e, where: (score > 0)}
+    .inV() {as: g}
+    RETURN g.symbol, d.name
+
+MATCH {class:Disease, as: d, where: (id = "EFO_0003778")}
+	.outE("IsAssociatedWith") {as: d2g, where: (score > 0)}
+    .inV() {as: g}
+    .inE("IsExpressedIn") {as: g2t, where: (rnaLevel > 1)}
+    .outV()
+    {as: t}
+    RETURN d.name, d2g.score, g.symbol, g2t.rnaLevel, t.name
+```
