@@ -38,6 +38,7 @@ $ cd bin
 $ oetl.sh /etl/loaders/vertex-gene.json
 $ oetl.sh /etl/loaders/vertex-efo.json
 $ oetl.sh /etl/loaders/vertex-tissue.json
+$ oetl.sh /etl/loaders/edge-efo-efo.json
 $ oetl.sh /etl/loaders/edge-gene-efo.json
 $ oetl.sh /etl/loaders/edge-gene-tissue.json
 ```
@@ -71,4 +72,21 @@ MATCH {class:Disease, as: d, where: (id = "EFO_0003778")}
     .outV()
     {as: t}
     RETURN d.name, d2g.score, g.symbol, g2t.rnaLevel, t.name
+
+MATCH {class:Disease, as: d, where: (id = "Orphanet_848")}
+	.in("IsChildOf") {as: d2, while: ($depth < 2)}
+	.outE("IsAssociatedWith") {as: e, where: (score > 0)}
+    .inV() {as: g}
+    RETURN DISTINCT g.symbol
+```
+
+## Using the console
+
+As an alternative to running commands in OrientDB Studio, you can use the CLI (from `/orientdb/bin` directory). This also allows you to export the database.
+
+```
+$ console.sh
+orientdb> connect plocal:/orientdb/databases/opentargets admin admin
+orientdb {db=opentargets}> MATCH {class:Gene, as: g, where: (symbol = "BRAF")}.inE("IsExpressedIn") {as: e, where: (rnaLevel > 4)}.outV(){as: t} RETURN g.symbol, t.name
+orientdb {db=opentargets}> EXPORT DATABASE /etl/data/opentargets.dump
 ```

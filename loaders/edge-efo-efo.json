@@ -1,0 +1,42 @@
+{
+  "source": {
+    "file": { "path": "/etl/data/processed/18.10_edge-efo-efo.csv.gz" }
+  },
+  "extractor": { "csv": {} },
+  "transformers": [
+    { "merge": { "joinFieldName": "id", "lookup": "Disease.id" } },
+    { "vertex": { "class": "Disease", "skipDuplicates": true } },
+    {
+      "edge": {
+        "class": "IsChildOf",
+        "joinFieldName": "childId",
+        "lookup": "Disease.id",
+        "direction": "in",
+        "targetVertexFields": {}
+      }
+    },
+    {
+      "field": {
+        "fieldNames": ["childId"],
+        "operation": "remove"
+      }
+    }
+  ],
+  "loader": {
+    "orientdb": {
+      "dbURL": "plocal:/orientdb/databases/opentargets",
+      "dbType": "graph",
+      "classes": [
+        { "name": "Disease", "extends": "V" },
+        { "name": "IsChildOf", "extends": "E" }
+      ],
+      "indexes": [
+        {
+          "class": "Disease",
+          "fields": ["id:string"],
+          "type": "UNIQUE"
+        }
+      ]
+    }
+  }
+}

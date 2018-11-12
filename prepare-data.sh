@@ -60,7 +60,10 @@ echo '"id","childId"' | gzip > $LOCAL_PROCESSED_DIR$EDGE_EFO_EFO
 gzcat $LOCAL_RAW_DIR$RAW_EFO | jq -r '. as $in | ._source.children[] | . as $children | [$in._id] + [$children | .code] | @csv' | gzip >> $LOCAL_PROCESSED_DIR$EDGE_EFO_EFO
 
 echo "-- GENE -> EFO"
-gzcat $LOCAL_RAW_DIR$RAW_ASSOCS | sed '1s/^/[/; $!s/$/,/; $s/$/]/' | jq -r '(["geneId", "efoId", "score", "count"], (.[] | [.target.id, .disease.id, .association_score.overall, .evidence_count.total])) | @csv' | gzip > $LOCAL_PROCESSED_DIR$EDGE_GENE_EFO
+# ALL
+# gzcat $LOCAL_RAW_DIR$RAW_ASSOCS | sed '1s/^/[/; $!s/$/,/; $s/$/]/' | jq -r '(["geneId", "efoId", "score", "count"], (.[] | [.target.id, .disease.id, .association_score.overall, .evidence_count.total])) | @csv' | gzip > $LOCAL_PROCESSED_DIR$EDGE_GENE_EFO
+# ONLY DIRECT (SHOULD BE ABLE TO INFER INDIRECT VIA EFO HIERARCHY TRAVERSAL)
+gzcat $LOCAL_RAW_DIR$RAW_ASSOCS | grep '"is_direct": true' | sed '1s/^/[/; $!s/$/,/; $s/$/]/' | jq -r '(["geneId", "efoId", "score", "count"], (.[] | [.target.id, .disease.id, .association_score.overall, .evidence_count.total])) | @csv' | gzip > $LOCAL_PROCESSED_DIR$EDGE_GENE_EFO
 
 echo "Built loadable edge files."
 
